@@ -1,54 +1,48 @@
-from habit_tracker import Habit
+from datetime import datetime, timedelta
+
+class Habit:
+    def __init__(self, name, frequency, creation_date=None, completions=None):
+        self.name = name
+        self.frequency = frequency  # "daily" or "weekly"
+        self.created_at = creation_date if creation_date else datetime.now()
+
+        if completions is None:
+            self.completions = []
+        else:
+            self.completions = [
+                datetime.fromisoformat(dt).date() if isinstance(dt, str) else dt
+                for dt in completions
+            ]
+
+    def get_longest_streak(self):
+        if not self.completions:
+            return 0
+
+        sorted_dates = sorted(self.completions)
+        longest = 1
+        current = 1
+        gap = timedelta(days=1) if self.frequency == "daily" else timedelta(weeks=1)
+
+        for i in range(1, len(sorted_dates)):
+            if sorted_dates[i] - sorted_dates[i - 1] == gap:
+                current += 1
+                longest = max(longest, current)
+            else:
+                current = 1  # streak broken
+
+        return longest
+
+    def __str__(self):
+        return f"{self.name} ({self.frequency})"
+
 
 class HabitTracker:
     def __init__(self):
         self.habits = []
-    
-    def add_habit (self, habit):
+
+    def add_habit(self, habit):
         self.habits.append(habit)
 
-    def list_habits (self):
-        for i, habit in enumerate (self.habits,1):
-            print (f"{i}.{habit}")
-    
-    def find_habit (self, name):
-        for habit in self.habits:
-            if habit.name.lower() == name.lower():
-                return habit
-            return None
-        
-    def complete_habit (self, name):
-        habit = self.find_habit(name)
-        if habit:
-            habit.mark_complete()
-            print(f"✅ Marked '{name}' as complete!")
-        else: 
-            print(f"❌ Habit '{name}' not found.")
+    def list_habits(self):
+        return self.habits
 
-    # Begining of the method to filter habits by the frequency 
-    
-    def filter_by_frequence (self, frequency) :
-        filtered = list(filter(lambda h: h.frequency == frequency, self.habits))
-        return filtered 
-    
-    #End of the method to filter habits by the frequency 
-
-    # Begining of the print the frequency 
-
-    def filter_by_frequency(self, frequency):
-        filtered = list(filter(lambda h: h.frequency == frequency, self.habits))
-        print(f"\n Habits with frequeny '{frequency}':")
-        for i, habit in enumerate (filtered, 1):
-            print(f"{i}. {habit}")
-        return filtered
-    
-    #End of print the frequency 
-
-    # Begining of the map() method to list only habit names 
-    def list_habit_names(self):
-        names = list (map(lambda h: h.name, self.habits))
-        print ("\n Habit Names:")
-        for name in names:
-            print("-", name)
-    
-    #End of the map() method to list only habit names 
